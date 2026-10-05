@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="de"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Erzähllabor – Erzähltheorie für die Oberstufe</title>
+<style>
+:root{--bg:#fff;--bg2:#f4f5f7;--tx:#1b1f27;--tx2:#4d5563;--ac:#1F3864;--ok:#0b6b4f;--no:#a33a1f;--bd:#d5d9e0}
+@media(prefers-color-scheme:dark){:root{--bg:#16181d;--bg2:#21242b;--tx:#eceef2;--tx2:#aab0bc;--ac:#8fb0ee;--ok:#5fcaa5;--no:#f0997b;--bd:#383d47}}
+*{box-sizing:border-box}body{margin:0;font:16px/1.6 system-ui,-apple-system,Segoe UI,sans-serif;background:var(--bg);color:var(--tx)}
+header{padding:1rem 1.25rem;border-bottom:1px solid var(--bd);display:flex;flex-wrap:wrap;gap:1rem;align-items:center;justify-content:space-between}
+h1{font-size:1.25rem;margin:0;color:var(--ac)}h2{color:var(--ac);margin-top:0}
+.st{font-size:.85rem;color:var(--tx2)}.bar{height:6px;background:var(--bg2);border-radius:3px;width:180px;margin-top:4px}.bar i{display:block;height:100%;background:var(--ok);border-radius:3px}
+.wrap{display:flex;flex-wrap:wrap}nav{flex:0 0 250px;padding:1rem;border-right:1px solid var(--bd)}main{flex:1;min-width:280px;max-width:820px;padding:1.5rem}
+nav button{display:block;width:100%;text-align:left;margin:2px 0;padding:.45rem .6rem;border:1px solid transparent;border-radius:6px;background:none;color:var(--tx);font:inherit;font-size:.92rem;cursor:pointer}
+nav button[aria-current=true]{background:var(--bg2);border-color:var(--ac);font-weight:600}nav button:disabled{color:var(--tx2);cursor:default}
+button,select,textarea{font:inherit}:focus-visible{outline:3px solid var(--ac);outline-offset:2px}
+.o,.b{display:block;width:100%;text-align:left;margin:6px 0;padding:.6rem .8rem;border:1px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--tx);cursor:pointer}
+.b{display:inline-block;width:auto;margin-right:6px}.o:hover,.b:hover{background:var(--bg2)}.o.ok{border-color:var(--ok);background:var(--bg2)}.o.no{border-color:var(--no)}
+.q{border:1px solid var(--bd);border-radius:10px;padding:1rem;margin:1rem 0}.fb{font-size:.92rem;color:var(--tx2);margin:.4rem 0 0}
+.box{background:var(--bg2);border-radius:8px;padding:.8rem 1rem;margin:1rem 0}.tag{font-size:.75rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2)}
+textarea{width:100%;min-height:110px;padding:.6rem;border:1px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--tx)}
+table{border-collapse:collapse;width:100%;font-size:.9rem;display:block;overflow-x:auto}td,th{border:1px solid var(--bd);padding:.4rem .6rem;text-align:left;vertical-align:top}
+.s{cursor:pointer;padding:1px 2px;border-radius:4px}.s:hover,.s.on{background:var(--bg2);outline:1px solid var(--ac)}
+@media(max-width:700px){nav{flex-basis:100%;border-right:0;border-bottom:1px solid var(--bd)}}
+@media(prefers-reduced-motion:no-preference){.bar i{transition:width .3s}}
+.gr{display:grid;grid-template-columns:200px 1fr 1fr;gap:.4rem 1rem;padding:.6rem 0;border-top:1px solid var(--bd);font-size:.92rem}.gh{font-size:.75rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2);border-top:0}.ex{font-style:italic;color:var(--tx2)}
+.chip{margin:2px 4px 2px 0;padding:.3rem .7rem;border:1px solid var(--bd);border-radius:20px;background:var(--bg);color:var(--tx);cursor:pointer;font-size:.85rem}.chip[aria-pressed=true]{background:var(--ac);color:var(--bg);border-color:var(--ac)}h3{margin:1.4rem 0 .2rem;font-size:1.05rem}
+@media(max-width:700px){.gr{grid-template-columns:1fr}.gh{display:none}}
+</style></head><body>
+<header><div><h1>Erzähllabor</h1><div class="st">Erzähltheorie für die Oberstufe · alle Daten bleiben lokal in deinem Browser</div></div>
+<div class="st" aria-live="polite"><span id="pg"></span><div class="bar"><i id="pb" style="width:0"></i></div>
+<label>Niveau: <select id="lv" aria-label="Niveau wählen"><option value="0">Basis</option><option value="1">Fortgeschritten</option><option value="2">Experte</option></select></label></div></header>
+<div class="wrap"><nav id="nav" aria-label="Lernpfad"></nav><main id="main" tabindex="-1"></main></div>
+<script>
+const $=s=>document.querySelector(s);
+let S={lv:0,done:{},pts:0,txt:{}};
+try{Object.assign(S,JSON.parse(localStorage.getItem('el')||'{}'))}catch(e){}
+const save=()=>{try{localStorage.setItem('el',JSON.stringify(S))}catch(e){}};
+const A='Mara stellte den Koffer neben die Tür. Im Treppenhaus roch es nach Kohl und Bohnerwachs. Sie ahnte nicht, dass hinter der Tür jemand seit einer Stunde auf ihr Klingeln wartete.';
+const B='Ich stellte den Koffer neben die Tür. Im Treppenhaus roch es nach Kohl und Bohnerwachs. Hinter der Tür wartete vielleicht jemand auf mein Klingeln.';
+const G=[
+['Erzähler und Erzählverhalten',[
+['Autor, Erzähler, Figur','Der Autor schreibt den Text, der Erzähler ist die vermittelnde Stimme im Text, Figuren handeln in der erzählten Welt. Autor und Erzähler sind nicht identisch.','Ein Autor schreibt aus Sicht eines Mörders, ohne dessen Ansichten zu teilen.'],
+['Ich-Erzähler','Der Erzähler tritt als „ich“ in der Geschichte auf.','Ich stellte den Koffer neben die Tür.'],
+['Er-/Sie-Erzähler','Es wird in der 3. Person erzählt; der Erzähler kommt selbst nicht vor.','Mara stellte den Koffer neben die Tür.'],
+['Auktoriales Erzählverhalten','Der Erzähler überblickt das Geschehen, weiß mehr als die Figuren und darf kommentieren.','Sie ahnte nicht, dass hinter der Tür jemand wartete.'],
+['Personales Erzählverhalten','Das Geschehen wird aus der Sicht einer Figur dargeboten; der Erzähler tritt zurück.','Wieder niemand. Warum hatte er auch erwartet, dass jemand da wäre?'],
+['Neutrales Erzählverhalten','Der Erzähler berichtet sachlich von außen, ohne Gedanken, ohne Wertung.','Ein Mann stand am Gleis. Er sah zur Treppe.'],
+['Erzählhaltung','Einstellung des Erzählers zum Erzählten, z. B. neutral, ironisch oder kritisch.','Der Herr Direktor, wie immer von seiner Wichtigkeit durchdrungen, betrat den Raum. (ironisch)']]],
+['Perspektive und Wissen',[
+['Innensicht','Gedanken und Gefühle einer Figur werden mitgeteilt.','Mara spürte, wie ihr Herz schneller schlug.'],
+['Außensicht','Nur Wahrnehmbares wird mitgeteilt.','Mara stand reglos im Flur.'],
+['Wissensvorsprung des Erzählers','Der Erzähler weiß mehr als die Figur (Gegenteil: er weiß gleich viel oder weniger).','Sie ahnte nicht, dass hinter der Tür jemand wartete.']]],
+['Redewiedergabe',[
+['Erzählerbericht','Der Erzähler gibt Geschehen in eigenen Worten wieder.','Jonas ging zum Bahnhof und kaufte eine Fahrkarte.'],
+['Direkte Rede','Die Äußerung einer Figur wird wörtlich wiedergegeben.','„Ich komme morgen“, sagte Jonas.'],
+['Indirekte Rede','Die Äußerung wird mit Einleitung im Konjunktiv wiedergegeben.','Jonas sagte, er komme morgen.'],
+['Erlebte Rede','Gedanken einer Figur in der 3. Person und im Präteritum, ohne einleitenden Satz.','Jonas sah auf die Uhr. Schon wieder zu spät! Wie sollte er das erklären?'],
+['Innerer Monolog','Gedanken einer Figur werden unmittelbar wiedergegeben, meist in Ich-Form und im Präsens.','Zu spät. Wieder zu spät. Was sage ich ihr bloß?'],
+['Bewusstseinsstrom','Zugespitzte Form: ungeordneter, assoziativer Gedankenfluss, oft ohne Satzzeichen.','Uhr zu spät Bahnsteig Mutter der Geruch von Kohl nie anrufen sollen']]],
+['Zeit',[
+['Erzählzeit und erzählte Zeit','Erzählzeit: Dauer des Erzählens bzw. Lesens. Erzählte Zeit: Dauer des erzählten Geschehens.','Ein Jahr Handlung auf einer Seite: kurze Erzählzeit, lange erzählte Zeit.'],
+['Zeitdeckendes Erzählen','Erzählzeit und erzählte Zeit sind etwa gleich, typisch bei Dialogen.','„Kommst du?“ – „Gleich.“ – „Du sagst immer gleich.“'],
+['Zeitdehnung','Die Erzählzeit ist länger als die erzählte Zeit.','Der Ball flog. Sie sah ihn Zentimeter um Zentimeter näher kommen.'],
+['Zeitraffung','Die Erzählzeit ist kürzer als die erzählte Zeit.','Drei Jahre vergingen mit Arbeit und Warten.'],
+['Zeitsprung (Ellipse)','Ein Zeitraum wird ausgelassen.','Sie schloss die Tür. Im Frühjahr war das Haus leer.'],
+['Rückblende','Ein früheres Geschehen wird nachgeholt.','Im Zug fiel ihr ein, wie der Vater damals den Garten verkauft hatte.'],
+['Vorausdeutung','Späteres Geschehen wird angedeutet oder vorweggenommen.','Später würde sie sich an diesen Morgen erinnern.'],
+['Chronologisches Erzählen','Die Ereignisse werden in der zeitlichen Reihenfolge erzählt.','Erst der Streit, dann der Abschied, dann die Abreise.']]],
+['Raum und Figuren',[
+['Schauplatz','Ort, an dem das Geschehen spielt; er kann Stimmung und Bedeutung tragen.','Ein dunkler Treppenflur, in dem es nach Kohl riecht.'],
+['Protagonist und Antagonist','Protagonist: Hauptfigur. Antagonist: Gegenspieler.','Jonas will ausziehen, sein Vater stellt sich ihm entgegen.'],
+['Figurenkonstellation','Gesamtheit der Beziehungen zwischen den Figuren.','Zwei Geschwister streiten um das Erbe der Mutter.'],
+['Direkte Charakterisierung','Eigenschaften werden ausdrücklich benannt.','Jonas war ein geduldiger Mensch.'],
+['Indirekte Charakterisierung','Eigenschaften zeigen sich in Handeln, Reden und Umgebung.','Auch nach der dritten Absage wartete Jonas ruhig auf den Rückruf.']]],
+['Handlung und Aufbau',[
+['Exposition','Einführung in Figuren, Ort und Ausgangssituation.','Mara kommt mit ihrem Koffer im Treppenhaus an.'],
+['Konflikt und Spannungsbogen','Ein Konflikt treibt die Handlung; die Spannung steigt bis zum Höhepunkt.','Wird die Tür geöffnet?'],
+['Wendepunkt und Höhepunkt','Wendepunkt: die Handlung nimmt eine neue Richtung. Höhepunkt: Zuspitzung des Konflikts.','Die Tür öffnet sich, und davor steht ihr Bruder.'],
+['Offenes und geschlossenes Ende','Offen: der Ausgang bleibt ungeklärt. Geschlossen: der Konflikt wird aufgelöst.','Sie hob die Hand zur Klingel. (offen)'],
+['In medias res','Der Text beginnt mitten im Geschehen, ohne lange Einführung.','„Lauf!“, rief sie und riss die Tür auf.'],
+['Rahmen- und Binnenhandlung','Die Rahmenhandlung umgibt eine in sich erzählte Binnenhandlung.','Mara erzählt den Kindern, wie sie als Mädchen im Wald verlorenging.']]],
+['Vertiefung: Erzähltheorie',[
+['Homodiegetisch / heterodiegetisch','Genette: Der Erzähler ist Figur in seiner Geschichte (homodiegetisch) oder kommt nicht vor (heterodiegetisch). Das ist nicht dasselbe wie Ich-/Er-Erzähler im Schulmodell, aber eng verwandt.','Ich stellte den Koffer ab. (homodiegetisch)',1],
+['Extradiegetisch / intradiegetisch','Erzählebene: Der Erzähler steht außerhalb der Geschichte (extradiegetisch) oder erzählt als Figur innerhalb der Geschichte (intradiegetisch).','Mara erzählt den Kindern eine Geschichte (intradiegetisch).',1],
+['Nullfokalisierung, interne und externe Fokalisierung','Genette: Erzähler weiß mehr als die Figuren (null), nur so viel wie eine Figur (intern) oder weniger (extern). Das entspricht den Schulbegriffen nur grob.','Ein Mann stand am Gleis. (extern)',1],
+['Analepse und Prolepse','Fachbegriffe für Rückblende (Analepse) und Vorausdeutung (Prolepse).','Im Zug fiel ihr ein, wie der Vater damals ... (Analepse)',1],
+['Unzuverlässiges Erzählen','Der Erzähler gibt Anlass, seiner Darstellung zu misstrauen.','Ich habe nie gelogen, sagte er, und wischte sich die Hände ab.',1],
+['Multiperspektivisches Erzählen','Dasselbe Geschehen wird aus der Sicht mehrerer Figuren erzählt.','Derselbe Streit aus der Sicht von Mara, Jonas und der Oma.',1]]]
+];
+const M=[
+{id:'n',t:'Fachbegriffe im Überblick'},
+{id:'g',t:'1 Autor, Erzähler, Figur',h:`<h2>Autor, Erzähler, Figur</h2><p>Der Autor schreibt den Text. Der <b>Erzähler</b> ist die Stimme, die der Text selbst erfindet. <b>Figuren</b> leben in der erzählten Welt. Aussagen des Erzählers dürfen nicht ungeprüft dem Autor zugeschrieben werden.</p>`,
+qs:[{l:0,q:'Welche Instanz gehört immer zur erzählten Welt?',o:['Autor','Figur','Leser'],a:1,e:'Figuren sind Teil der erzählten Welt. Der Autor steht außerhalb.'},
+{l:1,q:'Eine Autorin schreibt aus Sicht eines Mörders. Welche Aussage trifft zu?',o:['Die Autorin teilt die Ansichten des Erzählers.','Ansichten des Erzählers sind nicht automatisch die der Autorin.'],a:1,e:'Der Erzähler ist eine im Text entworfene Instanz.'}]},
+{id:'e',t:'2 Erzähler & Erzählverhalten',h:`<h2>Erzähler und Erzählverhalten</h2><p><b>Entdecken:</b> Vergleiche beide Fassungen. Was weiß der Erzähler in A, das Mara nicht weiß?</p>
+<p><button class="b" onclick="ab(0)">Fassung A</button><button class="b" onclick="ab(1)">Fassung B</button></p><div class="box" id="abt" aria-live="polite">${A}</div>
+<svg id="svg" viewBox="0 0 400 110" role="img" aria-label="Lage des Erzählers relativ zur erzählten Welt" width="100%"><rect x="150" y="10" width="240" height="90" rx="8" fill="none" stroke="currentColor"/><text x="160" y="28" font-size="12" fill="currentColor">erzählte Welt (Figuren)</text><circle id="ec" cx="60" cy="60" r="26" fill="none" stroke="currentColor" stroke-width="2"/><text id="et" x="60" y="64" font-size="11" text-anchor="middle" fill="currentColor">Erzähler</text></svg>
+<p>Man unterscheidet die <b>Erzählform</b> (Ich-Erzähler, Er-/Sie-Erzähler) und das <b>Erzählverhalten</b> (auktorial, personal, neutral). Beides ist nicht dasselbe: Auch ein Ich-Erzähler kann mehr wissen als die Figur früher.</p>`,
+qs:[{l:0,q:'„Ich lief zum Bahnhof, doch der Zug war weg.“ Welche Erzählform liegt vor?',o:['Ich-Erzähler','Er-/Sie-Erzähler'],a:0,e:'Der Erzähler tritt als „ich“ auf.'},
+{l:0,q:'Der Erzähler weiß mehr als die Figuren und kommentiert. Welches Erzählverhalten?',o:['auktorial','personal','neutral'],a:0,e:'Überblick und Kommentar sind typisch für das auktoriale Erzählverhalten.'},
+{l:1,q:'„Wieder niemand. Warum hatte er auch erwartet, dass jemand da wäre?“ Hier dominiert …',o:['auktoriales Erzählverhalten','personales Erzählverhalten','neutrales Erzählverhalten'],a:1,e:'Die Gedanken der Figur stehen im Vordergrund, der Erzähler tritt zurück.'},
+{l:2,q:'Wie heißt ein Ich-Erzähler nach Genette?',o:['homodiegetisch','heterodiegetisch'],a:0,e:'Er ist Figur in der erzählten Welt. Das Schulmodell und Genettes Modell sind verwandt, aber nicht deckungsgleich.'}]},
+{id:'f',t:'3 Perspektive & Wissen',h:`<h2>Perspektive und Wissen</h2><p><b>Innensicht</b>: Gedanken und Gefühle werden mitgeteilt. <b>Außensicht</b>: nur Wahrnehmbares. Außerdem fragt man, ob der Erzähler mehr, gleich viel oder weniger weiß als die Figur (Wissensvorsprung).</p><p class="st">Vertiefung: Genette nennt das Nullfokalisierung, interne und externe Fokalisierung.</p>`,
+qs:[{l:0,q:'„Mara spürte, wie ihr Herz schneller schlug.“ Das ist …',o:['Innensicht','Außensicht'],a:0,e:'Ein Gefühl der Figur wird mitgeteilt.'},
+{l:0,q:'„Mara stand reglos im Flur.“ Das ist …',o:['Innensicht','Außensicht'],a:1,e:'Nur Äußeres ist wahrnehmbar.'},
+{l:1,q:'„Sie ahnte nicht, dass hinter der Tür jemand wartete.“ Der Erzähler hat …',o:['einen Wissensvorsprung','Wissensgleichstand','weniger Wissen als die Figur'],a:0,e:'Er weiß etwas, das die Figur nicht weiß.'},
+{l:2,q:'Der Erzähler weiß mehr als jede Figur. Genette nennt das …',o:['Nullfokalisierung','interne Fokalisierung','externe Fokalisierung'],a:0,e:'Entspricht grob dem auktorialen Erzählverhalten.'}]},
+{id:'d',t:'4 Redewiedergabe',h:`<h2>Redewiedergabe</h2><p><b>Erzählerbericht</b>, <b>direkte Rede</b>, <b>indirekte Rede</b>, <b>erlebte Rede</b>, <b>innerer Monolog</b>, <b>Bewusstseinsstrom</b>: Je nach Form ist der Erzähler stärker oder weniger spürbar. Beispiele stehen unter „Fachbegriffe im Überblick“.</p>`,
+qs:[{l:0,q:'„Anna sah auf die Uhr. Wieder zu spät! Wie sollte sie das erklären?“ Die zweite und dritte Äußerung sind …',o:['indirekte Rede','erlebte Rede','innerer Monolog','Erzählerbericht'],a:1,e:'3. Person und Präteritum, aber Ausruf und Frage zeigen die Gedankenwelt der Figur.'},
+{l:0,q:'„Er sagte, er komme später.“ ist …',o:['direkte Rede','indirekte Rede','erlebte Rede'],a:1,e:'Einleitung und Konjunktiv.'},
+{l:1,q:'„Zu spät. Wieder zu spät. Was sage ich ihr bloß?“ ohne Erzählerrahmen: …',o:['erlebte Rede','innerer Monolog','Erzählerbericht'],a:1,e:'Gedanken werden unmittelbar wiedergegeben.'}]},
+{id:'z',t:'5 Zeit',h:`<h2>Zeit</h2><p>Vergleiche <b>Erzählzeit</b> und <b>erzählte Zeit</b>: <b>zeitdeckend</b>, <b>Zeitdehnung</b>, <b>Zeitraffung</b>, <b>Zeitsprung</b>. Außerdem: <b>Rückblende</b> und <b>Vorausdeutung</b>.</p><p class="st">Vertiefung: Analepse und Prolepse.</p>`,
+qs:[{l:0,q:'Zehn Jahre werden auf zwei Seiten erzählt. Das ist …',o:['Zeitdehnung','Zeitraffung','Zeitsprung'],a:1,e:'Die erzählte Zeit ist viel länger als die Erzählzeit.'},
+{l:0,q:'Mitten in der Handlung erinnert sich eine Figur an ihre Kindheit. Das ist …',o:['Vorausdeutung','Rückblende','Zeitraffung'],a:1,e:'Früheres Geschehen wird nachgeholt.'},
+{l:1,q:'„Sie schloss die Tür. Im Frühjahr war das Haus leer.“ Der Zeitraum dazwischen ist …',o:['ein Zeitsprung (Ellipse)','Zeitdehnung','eine Rückblende'],a:0,e:'Der Zeitraum wird ausgelassen.'},
+{l:2,q:'„Analepse“ ist der Fachbegriff für …',o:['Rückblende','Vorausdeutung','Zeitsprung'],a:0,e:'Prolepse wäre die Vorausdeutung.'}]},
+{id:'r',t:'6 Raum',h:`<h2>Raum</h2><p>Der <b>Schauplatz</b> ist der Ort, an dem das Geschehen spielt. Er informiert nicht nur, sondern kann <b>Stimmung</b> erzeugen (Atmosphäre) oder <b>symbolisch</b> auf die Figur oder das Thema verweisen. Frage bei der Analyse immer: Welche Funktion hat dieser Ort an dieser Stelle?</p><div class="box">„Im Treppenhaus roch es nach Kohl und Bohnerwachs.“ Der Raum wirkt eng, alt und freudlos und passt zur Stimmung der Figur.</div>`,
+qs:[{l:0,q:'Wie heißt der Ort, an dem das Geschehen einer Erzählung spielt?',o:['Schauplatz','Exposition','Figurenkonstellation'],a:0,e:'Der Schauplatz ist der Handlungsort.'},
+{l:1,q:'Ein grauer, verregneter Hinterhof wird beschrieben, während Jonas seine Kündigung liest. Welche Funktion hat der Raum?',o:['Er unterstreicht die Stimmung der Figur.','Er hat keine Funktion.','Er ist reine Sachinformation.'],a:0,e:'Der Raum spiegelt die gedrückte Stimmung (Atmosphäre).'},
+{l:2,q:'Ein Zug, der nie ankommt, steht für das Leben der Figur. Das ist …',o:['symbolische Raumgestaltung','neutrale Beschreibung','eine Rückblende'],a:0,e:'Der Raum steht über sich hinaus für ein Thema oder eine Lage.'}]},
+{id:'fi',t:'7 Figuren',h:`<h2>Figuren</h2><p><b>Protagonist</b> (Hauptfigur) und <b>Antagonist</b> (Gegenspieler) stehen oft in einer <b>Figurenkonstellation</b>, also in einem Beziehungsgeflecht. Eigenschaften werden <b>direkt</b> benannt oder zeigen sich <b>indirekt</b> in Handeln, Reden und Umgebung.</p><div class="box"><b>Direkt:</b> Jonas war ein geduldiger Mensch.<br><b>Indirekt:</b> Auch nach der dritten Absage wartete Jonas ruhig auf den Rückruf.</div>`,
+qs:[{l:0,q:'Wie nennt man die Hauptfigur einer Erzählung?',o:['Antagonist','Protagonist','Erzähler'],a:1,e:'Protagonist = Hauptfigur, Antagonist = Gegenspieler.'},
+{l:0,q:'„Jonas war ein geduldiger Mensch.“ Das ist …',o:['direkte Charakterisierung','indirekte Charakterisierung'],a:0,e:'Die Eigenschaft wird ausdrücklich benannt.'},
+{l:1,q:'„Auch nach der dritten Absage wartete Jonas ruhig auf den Rückruf.“ Das ist …',o:['direkte Charakterisierung','indirekte Charakterisierung'],a:1,e:'Die Geduld zeigt sich im Verhalten, sie wird nicht benannt.'},
+{l:1,q:'Zwei Geschwister streiten um das Erbe der Mutter. Welcher Begriff beschreibt die Beziehungen der Figuren?',o:['Figurenkonstellation','Schauplatz','Erzählhaltung'],a:0,e:'Die Figurenkonstellation ist das Beziehungsgeflecht der Figuren.'}]},
+{id:'h',t:'8 Handlung & Aufbau',h:`<h2>Handlung und Aufbau</h2><p>Die Handlung wird durch einen <b>Konflikt</b> vorangetrieben. Typischer Aufbau: <b>Exposition</b> → Konflikt/Spannungsanstieg → <b>Wendepunkt</b> → <b>Höhepunkt</b> → Schluss (<b>offen</b> oder <b>geschlossen</b>). Viele Kurzgeschichten beginnen <b>in medias res</b> und enden offen.</p>
+<svg viewBox="0 0 400 110" role="img" aria-label="Spannungsbogen mit Exposition, Konflikt, Wendepunkt, Höhepunkt und Schluss" width="100%"><polyline points="10,95 80,85 160,60 240,30 290,55 390,80" fill="none" stroke="currentColor" stroke-width="2"/><g font-size="11" fill="currentColor"><text x="10" y="108">Exposition</text><text x="110" y="52">Konflikt</text><text x="195" y="22">Höhepunkt</text><text x="262" y="75">Wendepunkt</text><text x="335" y="98">Schluss</text></g></svg><p class="st">Hinweis: Die Lage von Wende- und Höhepunkt hängt vom Modell ab. Bei Kurzgeschichten fehlen einzelne Phasen oft.</p>`,
+qs:[{l:0,q:'Welcher Teil führt in Figuren, Ort und Ausgangssituation ein?',o:['Exposition','Höhepunkt','Schluss'],a:0,e:'Die Exposition stellt die Ausgangslage vor.'},
+{l:0,q:'Ein Text beginnt mit „Lauf!“, rief sie und riss die Tür auf. Das ist …',o:['ein Einstieg in medias res','eine Rahmenhandlung','eine Exposition'],a:0,e:'Der Text beginnt mitten im Geschehen.'},
+{l:1,q:'Eine Geschichte endet mit: Sie hob die Hand zur Klingel. Das ist …',o:['ein offenes Ende','ein geschlossenes Ende'],a:0,e:'Der Ausgang bleibt ungeklärt.'},
+{l:1,q:'Die Handlung nimmt plötzlich eine neue Richtung. Wie heißt dieser Punkt?',o:['Wendepunkt','Exposition','Schauplatz'],a:0,e:'Der Wendepunkt ändert den Verlauf. Der Höhepunkt ist die Zuspitzung des Konflikts.'}]},
+{id:'k',t:'9 Komplexe Erzählformen (Vertiefung)',h:`<h2>Komplexe Erzählformen</h2><p><b>Rahmen- und Binnenhandlung:</b> Eine Geschichte wird innerhalb einer anderen erzählt. Erzähltheoretisch: Die Binnengeschichte wird <b>intradiegetisch</b> erzählt. <b>Multiperspektivisches Erzählen</b> zeigt dasselbe Geschehen aus mehreren Sichten. Bei <b>unzuverlässigem Erzählen</b> gibt der Text Anlass, der Darstellung des Erzählers zu misstrauen.</p><div class="box">Beispiel: „Ich habe nie gelogen“, sagte er und wischte sich die Hände an der Hose ab. Das Verhalten widerspricht dem Satz.</div>`,
+qs:[{l:0,q:'Mara erzählt den Kindern, wie sie als Mädchen im Wald verlorenging. Die Geschichte vom Verlorengehen im Wald ist …',o:['die Rahmenhandlung','die Binnenhandlung'],a:1,e:'Maras Erzählung ist die Binnenhandlung, die Szene mit den Kindern bildet den Rahmen.'},
+{l:1,q:'Derselbe Streit wird nacheinander aus der Sicht dreier Figuren erzählt. Das ist …',o:['multiperspektivisches Erzählen','unzuverlässiges Erzählen','Zeitraffung'],a:0,e:'Das Geschehen wird aus mehreren Sichten gezeigt.'},
+{l:2,q:'Ein Erzähler beteuert seine Unschuld, der Text zeigt aber Widersprüche. Das ist …',o:['unzuverlässiges Erzählen','neutrales Erzählverhalten','ein offenes Ende'],a:0,e:'Der Text gibt Hinweise, der Darstellung nicht zu trauen.'},
+{l:2,q:'Wie nennt man die Ebene, auf der Mara als Figur den Kindern erzählt?',o:['extradiegetisch','intradiegetisch'],a:1,e:'Eine Figur erzählt innerhalb der erzählten Welt.'}]},
+{id:'l',t:'10 Text unter der Lupe'},{id:'w',t:'11 Erzählwerkstatt'},{id:'c',t:'12 Abschluss-Challenge',h:`<h2>Abschluss-Challenge</h2><p>Lies den unbekannten Text genau und löse die Aufgaben selbstständig. Danach erklärst du die Wirkung und schreibst eine Passage um.</p><div class="box"><span class="tag">Text (selbst verfasst)</span><p>Als Lena die Wohnungstür aufschloss, roch es nach kaltem Rauch. Wieder hatte er das Fenster nicht geöffnet. Sie stellte die Tasche ab. „Bist du da?“, rief sie. Keine Antwort. Drei Jahre lang war sie jeden Abend so nach Hause gekommen. Im Wohnzimmer saß Tom vor dem Fernseher, ohne ihn anzusehen. Was wollte er eigentlich noch von ihr? Seine Hände zitterten leicht. Draußen fuhr die letzte Bahn vorbei, und im Flur tropfte der Wasserhahn. Lena wusste nicht, dass Tom seit Stunden einen Brief in der Tasche trug, den er ihr nie zeigen würde.</p></div>`,
+qs:[{l:0,q:'1. Welche Erzählform liegt vor?',o:['Ich-Erzähler','Er-/Sie-Erzähler'],a:1,e:'Es wird in der 3. Person erzählt, der Erzähler kommt nicht selbst vor.'},
+{l:0,q:'2. Welches Erzählverhalten überwiegt?',o:['auktorial','personal','neutral'],a:1,e:'Meist erleben wir die Szene aus Lenas Sicht. Erst der letzte Satz geht darüber hinaus (auktorial).'},
+{l:0,q:'3. „Was wollte er eigentlich noch von ihr?“ ist …',o:['direkte Rede','indirekte Rede','erlebte Rede','Erzählerbericht'],a:2,e:'Lenas Gedanken in der 3. Person, ohne einleitenden Satz.'},
+{l:0,q:'4. „Drei Jahre lang war sie jeden Abend so nach Hause gekommen.“ ist …',o:['Zeitraffung und Rückblende','Zeitdehnung','Vorausdeutung'],a:0,e:'Drei Jahre werden in einem Satz zusammengefasst und nachgeholt.'},
+{l:0,q:'5. „Seine Hände zitterten leicht.“ ist …',o:['direkte Charakterisierung','indirekte Charakterisierung'],a:1,e:'Toms Anspannung wird nicht benannt, sondern zeigt sich im Verhalten.'},
+{l:0,q:'6. Welche Wirkung hat der letzte Satz („Lena wusste nicht, dass Tom ...“)?',o:['Der Erzähler hat einen Wissensvorsprung und erzeugt Spannung.','Der Text wechselt zur Außensicht.','Der Text wird zum inneren Monolog.'],a:0,e:'Der Erzähler weiß mehr als Lena, die Leser ahnen die Wendung.'}],
+x:`<h3>Wirkung erklären</h3><p>Erkläre in drei bis vier Sätzen, wie das Erzählverhalten die Wirkung des Textes beeinflusst.</p><textarea id="c1" aria-label="Wirkung erklären"></textarea><p><button class="b" onclick="rv('mu')">Musterlösung aufdecken</button></p><div class="box" id="mu" hidden>Überwiegend personales Erzählverhalten: Wir erleben Lenas Unsicherheit nah mit. Der letzte Satz wechselt ins Auktoriale. Der Wissensvorsprung lässt uns Toms Verhalten anders deuten und erhöht die Spannung.</div>
+<h3>Umschreibaufgabe</h3><p>Schreibe die ersten vier Sätze neu und verändere dabei <b>genau eine Kategorie</b>:</p><select id="c4" aria-label="Kategorie wählen"><option>Erzählform (Ich-Erzähler)</option><option>Perspektive (aus Toms Sicht)</option><option>Zeit (Zeitdehnung)</option><option>Redewiedergabe (Gedanken als innerer Monolog)</option></select><textarea id="c2" aria-label="Umgeschriebene Passage"></textarea>
+<p>Selbstcheck:</p><label><input type="checkbox"> Ich habe nur eine Kategorie verändert.</label><br><label><input type="checkbox"> Die Veränderung ist im Text erkennbar.</label><br><label><input type="checkbox"> Ich kann das Fachwort für meine Veränderung nennen.</label>
+<p>Welche Wirkung ändert sich durch deine Entscheidung?</p><textarea id="c3" aria-label="Wirkung der Veränderung"></textarea><p><button class="b" id="cx">Als Textdatei sichern (Portfolio)</button></p>`},
+{id:'m',t:'Modelle im Vergleich'},{id:'i',t:'Info & Datenschutz'}];
+let cur='n',ab_=0,gcat=-1;
+const qm=M.filter(m=>m.qs),tot=()=>qm.reduce((n,m)=>n+m.qs.length,0);
+function head(){const n=Object.keys(S.done).length;$('#pg').textContent=n+' von '+tot()+' Aufgaben · '+S.pts+' Punkte'+(n==tot()?' · Erzählprofi':'');$('#pb').style.width=(100*n/tot())+'%'}
+function nav(){$('#nav').innerHTML=M.map(m=>`<button data-id="${m.id}" ${m.off?'disabled':''} ${m.id==cur?'aria-current="true"':''}>${m.t}${m.off?' (folgt)':''}${m.qs&&m.qs.every((q,i)=>S.done[m.id+i])?' ✓':''}</button>`).join('')}
+function quiz(m){return m.qs.map((q,i)=>q.l>S.lv?'':`<div class="q"><span class="tag">Aufgabe ${i+1} · ${['Basis','Fortgeschritten','Experte'][q.l]}</span><p><b>${q.q}</b></p>${q.o.map((o,j)=>`<button class="o ${S.done[m.id+i]&&j==q.a?'ok':''}" data-q="${m.id}|${i}|${j}">${o}</button>`).join('')}<p class="fb" aria-live="polite">${S.done[m.id+i]?'✓ '+q.e:''}</p></div>`).join('')}
+const sents=[['Als Jonas die Tür öffnete, war der Flur dunkel.','Er-Erzähler, Erzählerbericht; der dunkle Flur als Schauplatz schafft Atmosphäre.'],['Wieder niemand. Warum hatte er auch erwartet, dass jemand da wäre?','Erlebte Rede, Innensicht; personales Erzählverhalten.'],['Drei Wochen lang hatte er jeden Abend gewartet.','Zeitraffung und Rückblende.'],['Seine Mutter, die in diesem Moment im Zug nach Köln saß, dachte an ihn.','Auktoriales Erzählverhalten: Wissensvorsprung des Erzählers (Nullfokalisierung).'],['Der Kühlschrank summte.','Außensicht, eher neutrales Erzählverhalten; die Stille wirkt als Atmosphäre.']];
+const pv=[['Ich-Perspektive','Ich stand am Gleis 3 und hielt das Ticket fest. Ob sie kommen würde? Meine Hände waren feucht.','Große Nähe, aber Wissen auf das Ich begrenzt.'],['Personal','Jonas stand am Gleis 3 und hielt das Ticket fest. Ob sie kommen würde? Seine Hände waren feucht.','Nähe zur Figur bei Er-Form; der Erzähler tritt zurück.'],['Auktorial','Jonas stand am Gleis 3 und hielt das Ticket fest. Er ahnte nicht, dass Mara längst im Taxi saß.','Wissensvorsprung erzeugt Spannung und Ironie.'],['Außensicht','Ein junger Mann stand am Gleis 3. Er hielt ein Ticket und sah alle paar Sekunden zur Treppe.','Distanz; Gefühle müssen erschlossen werden.']];
+const WK={
+z:{h:'Zeitwerkstatt',b:'Jonas stand am Gleis 3 und wartete. Der Zug hatte zehn Minuten Verspätung.',o:[
+['Zeitdehnung','Jonas stand am Gleis 3. Die Anzeige sprang um: zehn Minuten. Er zählte die Fugen im Asphalt, eine, zwei, drei, hörte die Tauben gurren und sah zur Uhr, deren Zeiger sich nicht rührte.','Die Erzählzeit wird länger als die erzählte Zeit: Das Warten wird quälend spürbar.'],
+['Zeitraffung','Zehn Minuten Verspätung, dann zwanzig, dann eine Stunde. Als der Zug endlich kam, war es dunkel.','Viel Zeit in wenigen Sätzen: Die Dauer des Wartens wird zusammengefasst, das Tempo steigt.'],
+['Zeitsprung (Ellipse)','Jonas stand am Gleis 3 und wartete. Abends saß er allein in der Küche.','Die Auslassung lässt offen, was geschah, und regt die Leserfantasie an.'],
+['Rückblende','Jonas stand am Gleis 3 und wartete. Vor drei Jahren war er genau hier gestanden, als Mara abgereist war.','Die Vorgeschichte erklärt die Anspannung und vertieft die Figur.'],
+['Vorausdeutung','Jonas stand am Gleis 3 und wartete. Er ahnte nicht, dass es das letzte Mal sein würde.','Erzeugt Spannung und Vorahnung; der Erzähler weiß mehr als die Figur.']]},
+e:{h:'Erzählerwerkstatt',b:'Mara öffnete den Brief.',o:[
+['Erzählerwissen erhöhen','Mara öffnete den Brief. Sie ahnte nicht, dass er eine Nachricht enthielt, die ihr Leben ändern würde, und dass der Absender längst tot war.','Wissensvorsprung des Erzählers: auktoriales Erzählverhalten, Spannung durch dramatische Ironie.'],
+['Erzählerwissen begrenzen','Mara öffnete den Brief. Die Schrift kam ihr bekannt vor. Wer schrieb ihr noch?','Personales Erzählverhalten: Wir wissen nur, was Mara wahrnimmt und denkt.'],
+['Neutral erzählen','Mara öffnete den Brief. Sie las, faltete ihn zusammen und steckte ihn in die Tasche.','Außensicht: Gefühle bleiben offen, die Leser deuten selbst.'],
+['Erzähler kommentiert (ironisch)','Mara öffnete den Brief, wie sie alles öffnete: hastig und mit dem festen Vorsatz, hinterher nichts zu bereuen.','Die Erzählhaltung wird ironisch und lenkt die Wahrnehmung der Figur.'],
+['Unzuverlässiger Erzähler','Ich habe den Brief nicht gelesen, das schwöre ich. Ich habe nur kurz hineingesehen, Wort für Wort, und ihn dann wieder zugeklebt.','Der Widerspruch weckt Misstrauen gegenüber dem Ich-Erzähler.']]},
+f:{h:'Figurenwerkstatt',b:'Jonas ist nervös und wartet auf Mara.',o:[
+['Direkte Charakterisierung','Jonas war ein nervöser Mensch.','Die Eigenschaft wird benannt: knapp und eindeutig, aber wenig anschaulich.'],
+['Verhalten (indirekt)','Jonas klopfte mit dem Fuß auf den Boden und sah alle paar Sekunden auf sein Handy.','Die Nervosität zeigt sich im Handeln, die Leser erschließen sie selbst.'],
+['Gedanken (erlebte Rede)','Jonas sah aufs Handy. Noch nichts. Was, wenn sie nicht kam?','Innensicht: Wir sind nah an den Sorgen der Figur.'],
+['Figurenrede','„Sie kommt doch, oder?“, fragte Jonas zum dritten Mal, ohne die Antwort abzuwarten.','Die Rede zeigt Unsicherheit und die Beziehung zu anderen Figuren.'],
+['Beschreibung','Seine Fingerknöchel waren weiß, so fest hielt er das Ticket.','Körperliche Details machen den Zustand sichtbar, ohne ihn zu benennen.']]}};
+function wkh(){return Object.keys(WK).map(k=>`<h3>${WK[k].h}</h3><div class="box"><span class="tag">Ausgangstext</span><br>${WK[k].b}</div><p>${WK[k].o.map((o,i)=>`<button class="b" data-wk="${k}|${i}">${o[0]}</button>`).join('')}</p><div class="box" id="wk${k}" aria-live="polite">Wähle eine Variante und vergleiche die Wirkung. Schreibe den Ausgangstext danach selbst mit einer eigenen Entscheidung um.</div>`).join('')}
+function view(){const m=M.find(x=>x.id==cur);let h='';
+if(m.h)h=m.h+quiz(m)+(m.x||'');
+else if(cur=='n')h=`<h2>Fachbegriffe im Überblick</h2><p>Die Auswahl orientiert sich an der gängigen Schulpraxis in der Oberstufe. Begriffe der Erzähltheorie (Genette, Martínez/Scheffel) stehen unter „Vertiefung“.</p><div class="box"><b>Auf einen Blick:</b> Wer erzählt? → Erzähler · Wie viel weiß er? → Perspektive · Wie wird Rede wiedergegeben? → Redewiedergabe · Wie geht er mit Zeit um? → Zeit · Wer und wo? → Raum und Figuren · Wie ist es aufgebaut? → Handlung</div><label>Suche: <input id="gs" type="search" aria-label="Fachbegriff suchen" oninput="gl(this.value)"></label><div id="gc" role="group" aria-label="Kategorie wählen"></div><div id="gl"></div>`;
+else if(cur=='l')h=`<h2>Text unter der Lupe</h2><p>Klicke einen Satz an, analysiere ihn (Erzähler, Fokalisierung, Darbietung, Zeit, Raum) und schreibe deine Notiz. Erst dann die Musterlösung aufdecken.</p><div class="box">${sents.map((s,i)=>`<span class="s" tabindex="0" role="button" data-s="${i}">${s[0]}</span> `).join('')}</div><div id="lu"></div>`;
+else if(cur=='w')h=`<h2>Erzählwerkstatt</h2><p><b>Perspektivwechsel:</b> Wähle eine Erzählweise und vergleiche die Wirkung.</p><p>${pv.map((p,i)=>`<button class="b" data-pv="${i}">${p[0]}</button>`).join('')}</p><div class="box" id="pvt" aria-live="polite">Wähle eine Perspektive.</div>${wkh()}<h3>Eigene Kurzgeschichte</h3><p>Setze mindestens drei erzähltechnische Entscheidungen bewusst ein.</p><textarea id="t1" aria-label="Eigene Kurzgeschichte" placeholder="Dein Text …">${S.txt.t1||''}</textarea><h3>Reflexion</h3><textarea id="t2" aria-label="Reflexion" placeholder="Welche Erzählform, Perspektive, Zeitgestaltung? Welche Wirkung wolltest du erzeugen? Ist es gelungen?">${S.txt.t2||''}</textarea><p><button class="b" id="ex">Als Textdatei sichern (Portfolio)</button></p>`;
+else if(cur=='m')h=`<h2>Modelle im Vergleich</h2><table><tr><th>Frage</th><th>Schulmodell</th><th>Erzähltheorie (Vertiefung)</th></tr><tr><td>Wer erzählt?</td><td>Ich-Erzähler, Er-/Sie-Erzähler</td><td>homodiegetisch, heterodiegetisch; extra-/intradiegetisch</td></tr><tr><td>Wie viel weiß der Erzähler?</td><td>auktorial, personal, neutral; Innen-/Außensicht</td><td>Nullfokalisierung, interne, externe Fokalisierung</td></tr><tr><td>Zeitliche Ordnung</td><td>Rückblende, Vorausdeutung</td><td>Analepse, Prolepse</td></tr></table><p class="st">Die Begriffe sind nur verwandt, nicht deckungsgleich. Lege in einer Analyse fest, in welchem Modell du argumentierst.</p>`;
+else h=`<h2>Info & Datenschutz</h2><p>Diese Seite läuft ohne Server, ohne Konto, ohne Tracking und ohne externe Ressourcen. Fortschritt und eigene Texte werden nur im lokalen Speicher deines Browsers abgelegt. Beispieltexte sind selbst verfasst.</p><p><button class="b" id="rs">Alle lokalen Daten löschen</button></p><p class="st">Orientierung: gängige Oberstufen-Schulbücher Deutsch sowie Genette, <i>Die Erzählung</i>, und Martínez/Scheffel, <i>Einführung in die Erzähltheorie</i>. Begriffe vor dem Einsatz mit dem im Kurs eingeführten Schulbuch abgleichen.</p>`;
+$('#main').innerHTML=h;
+if(cur=='e')ab(0);if(cur=='n')gl('');
+if(cur=='w'){['t1','t2'].forEach(k=>$('#'+k).oninput=e=>{S.txt[k]=e.target.value;save()});$('#ex').onclick=()=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['Kurzgeschichte\n\n'+(S.txt.t1||'')+'\n\nReflexion\n\n'+(S.txt.t2||'')],{type:'text/plain'}));a.download='erzaehllabor-text.txt';a.click()}}
+if(cur=='c'){['c1','c2','c3','c4'].forEach(k=>{const el=$('#'+k);el.value=S.txt[k]||el.value;el.oninput=e=>{S.txt[k]=e.target.value;save()}});$('#cx').onclick=()=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['Abschluss-Challenge\n\nWirkung\n'+(S.txt.c1||'')+'\n\nKategorie: '+$('#c4').value+'\n\nUmgeschrieben\n'+(S.txt.c2||'')+'\n\nWirkung der Veränderung\n'+(S.txt.c3||'')],{type:'text/plain'}));a.download='erzaehllabor-challenge.txt';a.click()}}
+if(cur=='i')$('#rs').onclick=()=>{if(confirm('Wirklich alles löschen?')){S={lv:0,done:{},pts:0,txt:{}};save();init()}}}
+function rv(id){$('#'+id).hidden=false}
+function gc(i){gcat=i;gl($('#gs').value)}
+function gl(f){f=f.toLowerCase();$('#gc').innerHTML=['Alle',...G.map(c=>c[0])].map((n,i)=>`<button class="chip" aria-pressed="${gcat==i-1}" onclick="gc(${i-1})">${n}</button>`).join('');
+$('#gl').innerHTML='<div class="gr gh"><span>Begriff</span><span>Erklärung</span><span>Beispiel</span></div>'+G.map((c,ci)=>{if(gcat>=0&&gcat!=ci)return'';const r=c[1].filter(t=>(t[0]+t[1]+t[2]).toLowerCase().includes(f));return r.length?`<h3>${c[0]} <span class="st">(${r.length})</span></h3>`+r.map(t=>`<div class="gr"><b>${t[0]}${t[3]?' <span class="tag">Vertiefung</span>':''}</b><span>${t[1]}</span><span class="ex">${t[2]}</span></div>`).join(''):''}).join('')}
+function ab(i){$('#abt').textContent=i?B:A;$('#ec').setAttribute('cx',i?270:60);$('#et').setAttribute('x',i?270:60)}
+function go(id){cur=id;nav();view();head();$('#main').focus()}
+function init(){$('#lv').value=S.lv;nav();view();head()}
+$('#lv').onchange=e=>{S.lv=+e.target.value;save();view()};
+$('#nav').onclick=e=>{const b=e.target.closest('button');if(b&&!b.disabled)go(b.dataset.id)};
+const act=e=>{const t=e.target.closest('[data-q],[data-s],[data-pv],[data-wk]');if(!t)return;
+if(t.dataset.q){const[id,i,j]=t.dataset.q.split('|'),q=M.find(x=>x.id==id).qs[i],k=id+i,fb=t.parentNode.querySelector('.fb');
+if(+j==q.a){t.classList.add('ok');fb.textContent='✓ Richtig. '+q.e;if(!S.done[k]){S.done[k]=1;S.pts+=t.parentNode.dataset.w?0:1;save();head();nav()}}else{t.classList.add('no');fb.textContent='Noch nicht. Denk an den Unterschied der Kategorien und versuche es erneut.'}}
+if(t.dataset.s){document.querySelectorAll('.s').forEach(s=>s.classList.remove('on'));t.classList.add('on');const s=sents[t.dataset.s];$('#lu').innerHTML=`<p><b>Dein Satz:</b> „${s[0]}“</p><textarea aria-label="Deine Analyse"></textarea><p><button class="b" onclick="this.parentNode.nextElementSibling.hidden=false">Musterlösung aufdecken</button></p><div class="box" hidden>${s[1]}</div>`}
+if(t.dataset.wk){const[k,i]=t.dataset.wk.split('|'),o=WK[k].o[i];$('#wk'+k).innerHTML=`<p>${o[1]}</p><p class="st"><b>Wirkung:</b> ${o[2]}</p>`}
+if(t.dataset.pv){const p=pv[t.dataset.pv];$('#pvt').innerHTML=`<p>${p[1]}</p><p class="st"><b>Wirkung:</b> ${p[2]}</p>`}};
+$('#main').onclick=act;$('#main').onkeydown=e=>{if(e.key=='Enter'&&e.target.dataset.s)act(e)};
+init();
+</script></body></html>
